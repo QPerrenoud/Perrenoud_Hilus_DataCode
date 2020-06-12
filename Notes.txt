@@ -1,0 +1,6 @@
+2020-02-24: 
+I noticed an error in the analysis that had a significant impact on the result and implied that everything had to be recomputed.
+The error stemmed from the fact the z-scoring was performed on the overal gyrus data prior to the selection of GABAergic cells. 
+When this was corrected, both BIC, AIC and LogLikelihood selections pointed to a classification with 2 main clusters. A classification
+with 3 or 4 cluster singled out 1 cell CL160 into a single cluster. Inspection of this cells showed that it was a serious outlier on the 
+parameters ASat and tSat. Thus the cell was removed from the analysis.
