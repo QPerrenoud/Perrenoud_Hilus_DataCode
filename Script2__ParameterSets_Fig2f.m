@@ -1,11 +1,10 @@
 clear, close all
-chInputFolder   = 'C:\Users\perre\Dropbox\Leclerc et al. 2018\Brain Structure Function\New Analysis';
-% chInputFolder   = '/home/quentin/Dropbox/Leclerc et al. 2018/Brain Structure Function/New Analysis';
+chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Analyses_Gyrus_Cortex\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
-chInputFile     = 'Input_Matrix_NewClustering';
+chInputFile     = 'Input_Matrix_Hilus';
 chOutputFolder  = 'Figures';
-chSubFolder     = 'GAD_ParameterSets';
+chSubFolder     = '2__ParameterSets_Fig2f';
 % db1SizFig       = [100, 100, 1600, 900];
 db1SizFig       = [50, 50, 1250, 600];
 
@@ -26,6 +25,9 @@ db2ZData    = zscore(db2Data);
 % Seed random number generator
 rng(1984)
 %% Clusters GABAergic cells based on electrophysiological or molecular marker
+% Opens an output file
+hFID = fopen(fullfile(chOutputFolder, chSubFolder, 'Output.txt'), 'w');
+
 % Defines sub populations of interest for the analysis
 cCLU_POP    = {'GAD'};
 in1CluNum   = 2;
@@ -64,6 +66,8 @@ for iPSl = 1:inNSel
 %     db2ZData_PSel       = db2ZData(cSEL{iPop}, cPAR_SEL{iPSl}); %Out 2020-02-25 
     db2Data_PSel        = db2Data(cSEL{iPop}, cPAR_SEL{iPSl});
     db2ZData_PSel       = zscore(db2Data_PSel);
+    db2Data_PSel_1      = db2Data(cSEL{iPop}, cPAR_SEL{1});
+    db2ZData_PSel_1     = zscore(db2Data_PSel_1);
     db2DataAll_PSel     = db2DataAll(cSEL{iPop}, :);
     [inNObs, inNVar]    = size(db2ZData_PSel);
     
@@ -102,9 +106,17 @@ for iPSl = 1:inNSel
     
     % Does the K-Mean correction and prints the silhouette metrics
     in1CluKM    = kmeans(db2ZData_PSel, inNClu, 'start', db2CtrWard);
-    db1Sil      = silhouette(db2ZData_PSel, in1CluKM);
-    fprintf('%d cellules sur %d ont une valeur de silhouette negative\r', length(db1Sil(db1Sil < 0)), inNObs);
-    fprintf('Silhouette moyenne: %.3f\r', mean(db1Sil));
+    db1Sil_1    = silhouette(db2ZData_PSel_1, in1CluKM);
+    db1Sil_2    = silhouette(db2ZData_PSel, in1CluKM);
+    fprintf(hFID, '%s : \r', cCLU_MSEL{iPSl});
+    fprintf(hFID, '*************************\r\r');
+    fprintf(hFID, '-------- Silhouette -----------------------------\r');
+    fprintf(hFID, '--Original parameter set\r');
+    fprintf(hFID, '%d cell out %d have a negative silhouette value\r', sum(db1Sil_1 < 0), inNObs);
+    fprintf(hFID, 'Mean silhouette: %.3f\r', mean(db1Sil_1));
+    fprintf(hFID, 'Restricted parameter set\r');
+    fprintf(hFID, '%d cell out %d have a negative silhouette value\r', sum(db1Sil_2 < 0), inNObs);
+    fprintf(hFID, 'Mean silhouette: %.3f\r\r', mean(db1Sil_2));
     
     %Plots the silhouette
     iFig = iFig + 1; hFIG(iFig) = figure('Position', db1SizFig);
@@ -114,7 +126,9 @@ for iPSl = 1:inNSel
     % Plost the value of electrophysiological parameters
     iFig = iFig + 1; hFIG(iFig) = figure('Position', db1SizFig);
     cFIG_LABEL = cat(1, cFIG_LABEL, ['ParEphy_' cCLU_MSEL{iPSl}]);
+    fprintf(hFID, '-------- Ephys ---------------------------------\r');
     for iPar = in1Phy
+        fprintf(hFID, '%s: ++++++++++++++++++++++++++++++++\r', cPAR{iPar});
         subplot(4, 4, iPar), hold on
         for iClu = 1:inNClu
             bl1CluCells = in1CluKM == iClu;
@@ -122,31 +136,73 @@ for iPSl = 1:inNSel
             dbMean  = mean(db2Data(bl1CluCells, iPar));
             dbSEM   = sqrt(var(db2Data(bl1CluCells, iPar))/inNCells);
             errorbar(iClu, dbMean, dbSEM, dbSEM, 'o', 'Color', cCOLOR{iClu}, 'LineWidth', 2);
+            fprintf(hFID, 'Cluster %d: %.3f (+- %.3f)\r', iClu, dbMean, dbSEM); % Print results to file
         end
         set(gca, 'XTick', 1:inNClu);
         xlim([0 inNClu + 1]);
         xlabel('Clusters');
         title(cPAR(iPar));
+        
+        % Prints the significance to test 
+        fprintf(hFID, '--------------Sigficance (Mann Witney):\r');
+        for iClu = 1:inNClu, fprintf(hFID, '\tC%d', iClu); end
+        for iCl1 = 1:inNClu - 1
+            fprintf(hFID, '\r');
+            fprintf(hFID, 'C%d', iCl1); for iClu = 1:iCl1, fprintf(hFID, '\t'); end
+            for iCl2 = iCl1 + 1:inNClu
+                dbPVal = ranksum(db2Data(in1CluKM == iCl1, iPar), db2Data(in1CluKM == iCl2, iPar));
+                fprintf(hFID, '\t%.3f', dbPVal);
+            end
+        end
+        fprintf(hFID, '\r');
+        fprintf(hFID, '\r');
     end
     
     % Plots the marker histograms of the clusters
     iFig = iFig + 1; hFIG(iFig) = figure('Position', db1SizFig);
     cFIG_LABEL = cat(1, cFIG_LABEL, ['Histogram_' cCLU_MSEL{iPSl}]);
-    cMARKER     = {'VGluT1', 'GAD65', 'GAD67', 'NOS1', 'CA', 'PV', 'CR', 'NPY', 'VIP', 'SOM', 'CCK'};
+    cMARKER     = {'VGluT1', 'GAD65', 'GAD67', 'NOS1', 'PV', 'CR', 'NPY', 'SOM', 'CCK'};
     in1MrkIdx   = cellfun(@(x) find(ismember(cLABELS, x)), cMARKER);
     db2DatMark  = db2DataAll_PSel(:, in1MrkIdx);
     db2DatMark(:, 2) = db2DatMark(:, 2) | db2DatMark(:, 3);
     cMARKER(3) = []; cMARKER{2} = 'GAD';
     db2DatMark(:, 3) = [];
+    fprintf(hFID, '-------- Molecular markers -----------------------------\r');
+    fprintf(hFID, '\t');
+    for iMrk = 1:length(cMARKER), fprintf(hFID, '%s\t', cMARKER{iMrk}); end
+    fprintf(hFID, '\r');
     if inNClu <= inNPltCol, inRow = 1; inCol = inNClu;
     else, inRow = ceil(inNClu/inNPltCol); inCol = inNPltCol; end
+    [db2Prop, in2NObs] = deal(nan(inNClu, length(cMARKER))); 
     for iClu = 1:inNClu
         subplot(inRow, inCol, iClu)
-        bar(1:length(cMARKER), mean(db2DatMark(in1CluKM == iClu, :)))
+        db2Prop(iClu, :)    = mean(db2DatMark(in1CluKM == iClu, :), 1);
+        in2NObs(iClu, :)     = sum(in1CluKM == iClu); 
+        bar(1:length(cMARKER), db2Prop(iClu, :))
         set(gca, 'XTick', 1:length(cMARKER), 'XTickLabel', cMARKER')
         ylim([0 1.2])
-        title(sprintf('Cluster %d: N = %d', iClu, sum(in1CluKM == iClu)))
+        title(sprintf('Cluster %d: N = %d', iClu, sum(in1CluKM == iClu)));
+        fprintf(hFID, 'Clu%d', iClu);
+        for iMrk = 1:length(cMARKER), fprintf(hFID, '\t%.1f', db2Prop(iClu, iMrk) * 100); end
+        fprintf(hFID, '\r');
     end
+    fprintf(hFID, '\r');
+    
+    % Prints the significance of molecular marker association
+    fprintf(hFID, '--------------Sigficance (Binomial Test):\r');
+    fprintf(hFID, '\t');
+    for iMrk = 1:length(cMARKER), fprintf(hFID, '%s\t', cMARKER{iMrk}); end
+    fprintf(hFID, '\r');
+    for iCl1 = 1:inNClu - 1
+        for iCl2 = iCl1 + 1:inNClu
+            db1PVal = BinomialTest2(in2NObs(iCl1, :), db2Prop(iCl1, :), in2NObs(iCl2, :), db2Prop(iCl2, :));
+            fprintf(hFID, 'C%d-C%d', iCl1, iCl2);
+            for iMrk = 1:length(cMARKER), fprintf(hFID, '\t%.3f', db1PVal(iMrk)); end
+            fprintf(hFID, '\r');
+        end
+    end
+    fprintf(hFID, '\r');
+    fprintf(hFID, '\r');
     
     % Calculates the centroid of ward and the k-mean for two clusters to
     % compare the results of the different parameter sets
@@ -189,6 +245,18 @@ imagesc(1:inNSel, 1:inNObs, in2_2CKM_Srt), colormap(db2ColorMap);
 set(gca, 'XTick', 1:inNSel, 'XTickLabel', cCLU_MSEL);
 ylabel('Neuron #');
 title('GAD neurons : Cluster allocation as a function of parameter set')
+
+% Print number of reassigned cells
+fprintf(hFID, '\r');
+fprintf(hFID, '*******************************************************************\r');
+fprintf(hFID, '-------- Comparison of parameter sets -----------------------------\r');
+for iSel = 2:length(cCLU_MSEL)
+    inNDif = sum(in2_CluKMean(:, 1) ~= in2_CluKMean(:, iSel));
+    fprintf(hFID, '%s:\t%d reassignment\r', cCLU_MSEL{iSel}, inNDif);
+end
+
+% Close the output writing file
+fclose(hFID);
 %%
 warning off
 mkdir(chOutputFolder);

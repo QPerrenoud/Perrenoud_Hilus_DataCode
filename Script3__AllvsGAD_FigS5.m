@@ -1,12 +1,10 @@
 clear, close all
-chInputFolder   = 'C:\Users\perre\Dropbox\Leclerc et al. 2018\Brain Structure Function\New Analysis';
-% chInputFolder   = '/home/quentin/Dropbox/Leclerc et al. 2018/Brain Structure Function/New Analysis';
-% chInputFolder   = '/Users/Quentin/Dropbox/Leclerc et al. 2018/Brain Structure Function/New Analysis';
+chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Analyses_Gyrus_Cortex\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
-chInputFile     = 'Input_Matrix_NewClustering';
+chInputFile     = 'Input_Matrix_Hilus';
 chOutputFolder  = 'Figures';
-chSubFolder     = 'Global_vs_GAD';
+chSubFolder     = '3__AllvsGAD_FigS5';
 % db1SizFig       = [100, 100, 1600, 900];
 db1SizFig       = [50, 50, 1250, 600];
 
@@ -26,6 +24,16 @@ db2ZData    = zscore(db2Data);
 
 % Seed random number generator
 rng(1984)
+%% Finds the expression of molecular markers of not GABERGIC neurons
+bl1GAD = db2Data(:, 18) == 1;
+
+cMARKER = {'VGluT1', 'GAD65', 'GAD67', 'NOS1', 'CA', 'PV', 'CR', ...
+    'NPY', 'VIP', 'SOM', 'CCK'};
+
+for iMrk = 1:length(cMARKER)
+    bl1Mrk = ismember(cLABELS, cMARKER{iMrk});
+    fprintf('%s\t: %.1f%%\r', cMARKER{iMrk}, mean(db2DataAll(~bl1GAD, bl1Mrk)) * 100);
+end
 %% Clusters GABAergic cells based on electrophysiological or molecular marker
 % Defines sub populations of interest for the analysis
 cCLU_POP    = {'Global', 'GAD'};

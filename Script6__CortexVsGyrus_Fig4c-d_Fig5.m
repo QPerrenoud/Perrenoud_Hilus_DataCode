@@ -1,13 +1,11 @@
 clear, close all
-chInputFolder   = 'C:\Users\perre\Dropbox\Leclerc et al. 2018\Brain Structure Function\New Analysis';
-% chInputFolder   = '/home/quentin/Dropbox/Leclerc et al. 2018/Brain Structure Function/New Analysis';
-% chInputFolder   = '/Users/Quentin/Dropbox/Leclerc et al. 2018/Brain Structure Function/New Analysis';
+chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Analyses_Gyrus_Cortex\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
-chInputFile_1   = 'Input_Matrix_NewClustering';
+chInputFile_1   = 'Input_Matrix_Hilus';
 chInputFile_2   = 'Input_Matrix_Cortex300';
 chOutputFolder  = 'Figures';
-chSubFolder     = 'Cortex_Vs_Gyrus';
+chSubFolder     = '6__CortexVsGyrus_Fig4c-d_Fig5';
 % db1SizFig       = [100, 100, 1600, 900];
 db1SizFig       = [50, 50, 1250, 600];
 
@@ -154,13 +152,13 @@ for iPGp = 1:inNPGp
         subplot(2, 2, 1); pause(.1);
         PieScatter(db2Score_H0(:, 1), db2Score_H0(:, 2), db2DataH0(bl1SelH0, in1MrkIdx), db2Color)
         xlabel('PC1'), ylabel('PC2'), 
-        title(sprintf('%s : Cortex IN in Cortex Space', cIN_GP{iIGp}));
+        title(sprintf('%s : Cortex IN in Cortex Space (n = %d)', cIN_GP{iIGp}, sum(bl1SelH0)));
         db1XL = xlim; db1YL = ylim;
         subplot(2, 2, 2); pause(.1);
         PieScatter(db2Score_Tst(:, 1), db2Score_Tst(:, 2), db2Data(bl1SelTst, in1MrkIdx), db2Color, db1XL, db1YL)
         xlabel('PC1'), ylabel('PC2'), 
-        title(sprintf('Gyrus INs in Cortex Space (DotProduct : %.2f, p = %.3f; Mhl Dist : %.3f , p = %.3f;)',...
-            db1DotP(iIGp), db1PVal_DotP(iIGp), db1CMahalDist(iIGp), db1PVal_Dist(iIGp)));
+        title(sprintf('Gyrus INs in Cortex Space (n = %d, DotProduct : %.2f, p = %.3f; Mhl Dist : %.3f , p = %.3f;)',...
+            sum(bl1SelTst), db1DotP(iIGp), db1PVal_DotP(iIGp), db1CMahalDist(iIGp), db1PVal_Dist(iIGp)));
         subplot(2, 2, 3)
         xlabel('PC1'), ylabel('PC2'),
             % calculates the CC line
@@ -242,6 +240,7 @@ for iPGp = 1:inNPGp
         set(gca, 'XTick', 1:length(cPAR_FIG), 'XTickLabel', cPAR_FIG(in1Idx), 'YScale', 'log')
         ylim([min(db1SortP)./10 1])
         ylabel('PValue (Ranksum Test)')
+        title(sprintf('%d significant difference', sum(db1SortP < .05)));
         
         %Generates 2d plots of the most significant difference
         iFig = iFig + 1;

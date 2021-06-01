@@ -1,12 +1,10 @@
 clear, close all
-chInputFolder   = 'C:\Users\perre\Dropbox\Leclerc et al. 2018\Brain Structure Function\New Analysis';
-% chInputFolder   = '/home/quentin/Dropbox/Leclerc et al. 2018/Brain Structure Function/New Analysis';
-% chInputFolder   = '/Users/Quentin/Dropbox/Leclerc et al. 2018/Brain Structure Function/New Analysis';
+chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Analyses_Gyrus_Cortex\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
-chInputFile     = 'Input_Matrix_NewClustering';
+chInputFile     = 'Input_Matrix_Hilus';
 chOutputFolder  = 'Figures';
-chSubFolder     = 'GAD_PCALoadingTest';
+chSubFolder     = '4__PCALoadingTest_Fig3e';
 % db1SizFig       = [100, 100, 1600, 900];
 db1SizFig       = [100, 100, 800, 500];
 

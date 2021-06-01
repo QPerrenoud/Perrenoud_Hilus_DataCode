@@ -1,11 +1,10 @@
 clear, close all
-chInputFolder   = 'C:\Users\perre\Dropbox\Leclerc et al. 2018\Brain Structure Function\New Analysis';
-% chInputFolder   = '/home/quentin/Dropbox/Leclerc et al. 2018/Brain Structure Function/New Analysis';
+chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Analyses_Gyrus_Cortex\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
-chInputFile     = 'Input_Matrix_NewClustering';
-chOutputFolder  = 'Figures';
-chSubFolder     = 'Global_vs_GAD';
+chInputFile     = 'Input_Matrix_Hilus';
+chOutputFolder  = 'Figures'
+chSubFolder     = '1__Clustering_Fig2a-e_Fig3a';
 % db1SizFig       = [100, 100, 1600, 900];
 db1SizFig       = [50, 50, 1250, 600];
 
@@ -24,7 +23,7 @@ db2Data(:, 18) = db2DataAll(:,42) | db2DataAll(:, 43); % Merges the expression o
 db2ZData    = zscore(db2Data);
 
 % Seed random number generator
-rng(1984)
+rng(1984);
 %% Plots clusters and parameters
 % Defines sub populations of interest for the analysis
 cCLU_POP    = {'Global', 'GAD'};
@@ -112,7 +111,7 @@ for iPop = 1:length(cCLU_POP)
     % Plots the marker histograms of the clusters
     iFig = iFig + 1; hFIG(iFig) = figure('Position', db1SizFig);
     cFIG_LABEL = cat(1, cFIG_LABEL, ['Histogram_Mol_' cCLU_POP{iPop}]);
-    cMARKER     = {'VGluT1', 'GAD65', 'GAD67', 'NOS1', 'CA', 'PV', 'CR', 'NPY', 'VIP', 'SOM', 'CCK'};
+    cMARKER     = {'VGluT1', 'GAD65', 'GAD67', 'NOS1', 'PV', 'CR', 'NPY', 'SOM', 'CCK'};
     in1MrkIdx   = cellfun(@(x) find(ismember(cLABELS, x)), cMARKER);
     db2DatMark  = db2DataAll_Pop(:, in1MrkIdx);
     db2DatMark(:, 2) = db2DatMark(:, 2) | db2DatMark(:, 3);
