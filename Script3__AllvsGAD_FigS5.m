@@ -1,5 +1,5 @@
 clear, close all
-chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Analyses_Gyrus_Cortex\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
+chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
 chInputFile     = 'Input_Matrix_Hilus';
@@ -135,10 +135,5 @@ mkdir(chOutputFolder);
 mkdir(fullfile(chOutputFolder, chSubFolder));
 warning on)
 
-for iFig = 1:length(hFIG)
-    exportfig(hFIG(iFig) ,fullfile(chOutputFolder, chSubFolder, cFIG_LABEL{iFig}), 'Color', 'rgb', 'Renderer', 'painters');
-    set(hFIG(iFig), 'Units', 'centimeters')
-    db1Pos = get(hFIG(iFig), 'Position');
-    set(hFIG(iFig), 'PaperPositionMode', 'auto', 'PaperUnits', 'centimeters', 'PaperSize', [db1Pos(3) db1Pos(4)])
-    print(hFIG(iFig), fullfile(chOutputFolder, chSubFolder, cFIG_LABEL{iFig}), '-dpdf')
-end
+SaveFig(fullfile(chOutputFolder, chSubFolder), hFIG, cFIG_LABEL);
+close all

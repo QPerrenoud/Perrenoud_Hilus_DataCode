@@ -1,4 +1,5 @@
-function [dbPC_DotP_Test, dbPVal, db1CI, db2Score_H0, db2Score_Test] = PCAAngleTest(db2Mat_H0, db2Mat_Test, inNIter)
+function [dbPC_DotP_Test, dbPVal, db1CI, db2Score_H0, db2Score_Test, ...
+    db1VarExp_H0] = PCAAngleTest(db2Mat_H0, db2Mat_Test, inNIter)
 
 %Deals with optional arguments
 narginchk(1, 3)
@@ -27,7 +28,8 @@ db2Z_H0     = (db2Mat_H0 - db1Mu_H0)./db1SD_H0;
 db2Z_Test   = (db2Mat_Test - db1Mu_H0)./db1SD_H0;
 
 % calculates the ref loading of the first pca;
-db2PC_Coef      = pca(db2Z_H0);
+[db2PC_Coef, ~, db1VarExp_H0] = pca(db2Z_H0);
+db1VarExp_H0    = db1VarExp_H0 ./ sum(db1VarExp_H0);
 db1PC_Ref       = db2PC_Coef(:, 1)'; 
 db2Score_H0     = db2Z_H0 * db2PC_Coef; 
 db2Score_Test   = db2Z_Test * db2PC_Coef;
