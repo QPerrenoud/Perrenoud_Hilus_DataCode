@@ -1,5 +1,5 @@
 function [dbPC_DotP_Test, dbPVal, db1CI, db2Score_H0, db2Score_Test, ...
-    db1VarExp_H0] = PCAAngleTest(db2Mat_H0, db2Mat_Test, inNIter)
+    db1VarExp_H0, db1VarExp_Test] = PCAAngleTest(db2Mat_H0, db2Mat_Test, inNIter)
 
 %Deals with optional arguments
 narginchk(1, 3)
@@ -47,7 +47,8 @@ end
 db1PC_DotP_H0   = abs(db1PC_Ref * db2PC_Coef); % Dot product to the average (= to the cosine of the angle to ref since PC are unit vectors);
  
 %Now calculates the test dot product and derives a p-value
-db2PC_Coef_Test = pca(db2Z_Test);
+[db2PC_Coef_Test, ~, db1VarExp_Test] = pca(db2Z_Test);
+db1VarExp_Test  = db1VarExp_Test ./ sum(db1VarExp_Test);
 dbPC_DotP_Test  = abs(db1PC_Ref * db2PC_Coef_Test(:, 1));
 dbPVal          = mean(db1PC_DotP_H0 < dbPC_DotP_Test);
 db1CI           = quantile(db1PC_DotP_H0, [.05 .25 .5 .75 1])';

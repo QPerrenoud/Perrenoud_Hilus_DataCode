@@ -104,9 +104,9 @@ for iPGp = 1:inNPGp
     %mkdir(fullfile(chOutputFolder, chSubFolder, cPAR_GP{iPGp}));
     chGroupFolder = fullfile(chOutputFolder, chSubFolder, cPAR_GP{iPGp});
     mkdir(fullfile(chGroupFolder));
-
-    %save(fullfile(chGroupFolder, 'Workspace'), '-v7.3')
-    %savefig(hFIG,fullfile(chGroupFolder, 'Figures'));
+    
+    %Opens a file to print the stats
+    hFID = fopen(fullfile(chGroupFolder, 'Stats.txt'), 'w');
     
     clear hFIG cFIG_LABEL db2H db1H
     iFig = 0;
@@ -116,8 +116,10 @@ for iPGp = 1:inNPGp
     [db2CI_DotP, db2CI_Dist] = deal(nan(5, inNIGp));
     
     %Communicates
-    fprintf('%s parameters:\r---------------------------------------------\r', ...
+    fprintf('%s parameters:\n---------------------------------------------\r', ...
         cPAR_GP{iPGp})
+    fprintf(hFID, '%s parameters:\n---------------------------------------------\r', ...
+        cPAR_GP{iPGp});
     
     %Loops over marker of interest
     for iIGp = 1:inNIGp
@@ -129,13 +131,19 @@ for iPGp = 1:inNPGp
         db2Data_Tst     = db2Data(bl1SelTst, :);
         db2Data_Tst(:, [cCRIT_IDX{iIGp} cREM_PAR{iPGp}]) = [];
         [db1DotP(iIGp), db1PVal_DotP(iIGp), db2CI_DotP(:, iIGp), db2Score_H0, ...
-            db2Score_Tst, db1VarExp_H0] = PCAAngleTest(db2DataH0_Tst, db2Data_Tst);
+            db2Score_Tst, db1VarExp_H0, db1VarExp_Test] = PCAAngleTest(db2DataH0_Tst, db2Data_Tst);
         [db1CMahalDist(iIGp), db1PVal_Dist(iIGp), db2CI_Dist(:, iIGp)] = ...
             CentroidMahalDistTest(db2DataH0_Tst, db2Data_Tst);
         
         %Communicates
-        fprintf('%s\tPC1 DotProduct\t\t\t\t%.3f (p = %.4f)\r\tCentroid Mahalanobis Dist\t%.2f (p = %.4f)\r', ...
+        fprintf('%s\tPC1 DotProduct\t\t\t\t%.3f (p = %.4f)\n\tCentroid Mahalanobis Dist\t%.2f (p = %.4f)\n', ...
             cIN_GP{iIGp}, db1DotP(iPGp), db1PVal_DotP(iIGp), db1CMahalDist(iIGp), db1PVal_Dist(iIGp));
+        fprintf('Variance Explained H0:\t%.2f\nVariance Explained Test:\t%.2f\n', ...
+            db1VarExp_H0(1) * 100, db1VarExp_Test(1) * 100);
+        fprintf(hFID, '%s\tPC1 DotProduct\t\t\t\t%.3f (p = %.4f)\n\tCentroid Mahalanobis Dist\t%.2f (p = %.4f)\n', ...
+            cIN_GP{iIGp}, db1DotP(iPGp), db1PVal_DotP(iIGp), db1CMahalDist(iIGp), db1PVal_Dist(iIGp));
+        fprintf(hFID, 'Variance Explained H0:\t%.2f\nVariance Explained Test:\t%.2f\n', ...
+            db1VarExp_H0(1) * 100, db1VarExp_Test(1) * 100);
 %         continue
         
         % Plots the figure
@@ -260,6 +268,12 @@ for iPGp = 1:inNPGp
             xlim([0 3]);
             %ylabel(cPAR_FIG{inIdxPlt})
             title(sprintf('%s : p = %.4f', cPAR_FIG{inIdxPlt}, db1SortP(iPlt)));
+            fprintf('\n\n%s : p = %.4f', cPAR_FIG{inIdxPlt}, db1SortP(iPlt));
+            fprintf('\nCortex (mean +/- S.D):\t%.2f +/- %.2f', db1Mean(1), db1Err(1));
+            fprintf('\nHilus (mean +/- S.D):\t%.2f +/- %.2f', db1Mean(2), db1Err(2));
+            fprintf(hFID, '\n\n%s : p = %.4f', cPAR_FIG{inIdxPlt}, db1SortP(iPlt));
+            fprintf(hFID, '\nCortex (mean +/- S.D):\t%.2f +/- %.2f', db1Mean(1), db1Err(1));
+            fprintf(hFID, '\nHilus (mean +/- S.D):\t%.2f +/- %.2f', db1Mean(2), db1Err(2));
         end
         
         pause(.1)
@@ -268,6 +282,8 @@ for iPGp = 1:inNPGp
         clear hFIG cFIG_LABEL
         iFig = 0;
     end
+    fclose(hFID);
+    fprintf('\n');
     
     %Plots a figure of the dot products of the first PCs and their p-value
     iFig = iFig + 1;
