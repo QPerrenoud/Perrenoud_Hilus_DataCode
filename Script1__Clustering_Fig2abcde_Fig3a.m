@@ -1,5 +1,5 @@
 clear, close all
-chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
+chInputFolder   = 'D:\Perrenoud_Hilus_GitHub'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
 chInputFile     = 'Input_Matrix_Hilus';
@@ -131,8 +131,11 @@ for iPop = 1:length(cCLU_POP)
     % Plots the clusters on the two principal components
     iFig = iFig + 1; hFIG(iFig) = figure('Position', db1SizFig);
     cFIG_LABEL = cat(1, cFIG_LABEL, ['PCA_' cCLU_POP{iPop}]);
-    [~, db1PC] = pca(db2ZData_Pop);
+    [~, db1PC, db1Eig] = pca(db2ZData_Pop);
+    db1VarExp = 100 * db1Eig ./ sum(db1Eig);
     gscatter(db1PC(:,1), db1PC(:,2), in1CluKM);
+    xlabel(sprintf('PC1 (%.1f)', db1VarExp(1)));
+    ylabel(sprintf('PC2 (%.1f)', db1VarExp(2)));
     
     % Scrambles variables one by one to see their effect on the mean
     % silhouette value

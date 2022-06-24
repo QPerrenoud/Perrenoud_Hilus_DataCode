@@ -1,5 +1,5 @@
 clear, close all
-chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
+chInputFolder   = 'D:\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
 chInputFile_1   = 'Input_Matrix_Hilus';

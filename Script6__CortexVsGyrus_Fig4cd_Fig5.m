@@ -1,5 +1,5 @@
 clear, close all
-chInputFolder   = 'D:\Perrenoud_Leclerc_etal\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
+chInputFolder   = 'D:\Perrenoud_Hilus_DataCode'; % < ---- CHANGE TO LOCAL PATH
 cd(chInputFolder);
 addpath(genpath('Utilities'))
 chInputFile_1   = 'Input_Matrix_Hilus';
@@ -116,9 +116,9 @@ for iPGp = 1:inNPGp
     [db2CI_DotP, db2CI_Dist] = deal(nan(5, inNIGp));
     
     %Communicates
-    fprintf('%s parameters:\n---------------------------------------------\r', ...
+    fprintf('%s parameters:\n---------------------------------------------\n', ...
         cPAR_GP{iPGp})
-    fprintf(hFID, '%s parameters:\n---------------------------------------------\r', ...
+    fprintf(hFID, '%s parameters:\n---------------------------------------------\n', ...
         cPAR_GP{iPGp});
     
     %Loops over marker of interest
@@ -276,6 +276,9 @@ for iPGp = 1:inNPGp
             fprintf(hFID, '\nHilus (mean +/- S.D):\t%.2f +/- %.2f', db1Mean(2), db1Err(2));
         end
         
+        fprintf(hFID, '\n\n');
+        fprintf('\n\n');
+        
         pause(.1)
         SaveFig(chGroupFolder, hFIG, cFIG_LABEL);
         close all
@@ -283,7 +286,6 @@ for iPGp = 1:inNPGp
         iFig = 0;
     end
     fclose(hFID);
-    fprintf('\n');
     
     %Plots a figure of the dot products of the first PCs and their p-value
     iFig = iFig + 1;
